@@ -1,258 +1,265 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cafe Web App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cafe Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #121212; /* Глубокий черный */
-            --text-color: #FFFFFF; /* Белый */
-            --accent-color: #FFD700; /* Золотисто-желтый */
-            --card-bg: #1E1E1E; /* Светло-черный для карточек */
-            --hint-color: #AAAAAA; /* Серый для подсказок */
+            --bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --accent: #ffc107; /* Насыщенный желтый */
+            --text: #ffffff;
+            --gray: #888888;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
-            padding: 20px;
-            padding-bottom: 80px; /* Отступ для кнопки снизу */
-        }
-
-        h1.shop-name {
-            color: var(--accent-color);
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--accent-color);
-            display: inline-block;
-            left: 50%;
-            transform: translateX(-50%);
-            position: relative;
-        }
-
-        /* Стили Меню */
-        .menu-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .product-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
             padding: 15px;
+            -webkit-user-select: none;
+        }
+
+        header {
             text-align: center;
-            border: 1px solid transparent;
-            transition: border-color 0.3s ease;
+            padding: 20px 0;
         }
 
-        .product-card:active {
-            border-color: var(--accent-color);
-        }
-
-        .product-img {
-            width: 80px;
-            height: 80px;
+        .logo-icon {
+            font-size: 3rem;
+            color: var(--accent);
             margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px rgba(255, 193, 7, 0.3));
         }
 
-        .product-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 5px;
+        h1 {
+            font-size: 24px;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
         }
 
-        .product-price {
-            color: var(--accent-color);
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .counter {
+        /* Меню товаров */
+        .section-title {
+            font-size: 14px;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin: 25px 0 15px;
+            letter-spacing: 1px;
             display: flex;
-            justify-content: center;
             align-items: center;
             gap: 10px;
         }
 
-        .btn-count {
-            background-color: var(--accent-color);
-            color: #000;
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+            border: 1px solid #222;
+        }
+
+        .card:active {
+            transform: scale(0.95);
+        }
+
+        .card i {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .item-price {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .counter {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #252525;
+            border-radius: 12px;
+            padding: 5px;
+        }
+
+        .btn-math {
+            background: var(--accent);
             border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            font-size: 1.2rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            font-size: 18px;
             font-weight: bold;
+            color: #000;
             cursor: pointer;
         }
 
-        .count-value {
-            font-size: 1.2rem;
-            width: 20px;
-        }
+        .count-val { font-weight: bold; width: 30px; }
 
-        /* Стили Оформления */
-        .order-details {
-            margin-top: 30px;
-            background-color: var(--card-bg);
-            border-radius: 12px;
+        /* Поля ввода */
+        .input-group {
+            background: var(--card-bg);
+            border-radius: 15px;
             padding: 20px;
+            margin-top: 20px;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            color: var(--hint-color);
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-
-        input {
+        .input-field {
             width: 100%;
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 10px;
             padding: 12px;
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: var(--text-color);
-            font-size: 1rem;
-            box-sizing: border-box; /* Важно */
+            color: white;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            outline: none;
         }
 
-        input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
+        .input-field:focus { border-color: var(--accent); }
+
+        label { font-size: 13px; color: var(--gray); }
     </style>
 </head>
 <body>
 
-    <h1 class="shop-name">Cafe</h1>
+    <header>
+        <div class="logo-icon"><i class="fas fa-mug-hot"></i></div>
+        <h1>CAFE</h1>
+    </header>
 
-    <div class="menu-container">
-        <div class="product-card">
-            <img src="https://img.icons8.com/emoji/96/000000/coffee-cup-emoji.png" class="product-img" alt="Coffee">
-            <div class="product-name">Капучино</div>
-            <div class="product-price">65 ₴</div>
+    <div class="section-title">Класика</div>
+
+    <div class="grid">
+        <div class="card">
+            <i class="fas fa-coffee"></i>
+            <div class="item-name">Еспресо</div>
+            <div class="item-price">45 ₴</div>
             <div class="counter">
-                <button class="btn-count" onclick="changeCount('cap', -1)">-</button>
-                <span class="count-value" id="count-cap">0</span>
-                <button class="btn-count" onclick="changeCount('cap', 1)">+</button>
+                <button class="btn-math" onclick="update('esp', -1)">-</button>
+                <span class="count-val" id="esp">0</span>
+                <button class="btn-math" onclick="update('esp', 1)">+</button>
             </div>
         </div>
 
-        <div class="product-card">
-            <img src="https://img.icons8.com/emoji/96/000000/hot-beverage-emoji.png" class="product-img" alt="Latte">
-            <div class="product-name">Латте</div>
-            <div class="product-price">70 ₴</div>
+        <div class="card">
+            <i class="fas fa-mortar-pestle"></i>
+            <div class="item-name">Капучино</div>
+            <div class="item-price">65 ₴</div>
             <div class="counter">
-                <button class="btn-count" onclick="changeCount('lat', -1)">-</button>
-                <span class="count-value" id="count-lat">0</span>
-                <button class="btn-count" onclick="changeCount('lat', 1)">+</button>
+                <button class="btn-math" onclick="update('cap', -1)">-</button>
+                <span class="count-val" id="cap">0</span>
+                <button class="btn-math" onclick="update('cap', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <i class="fas fa-glass-whiskey"></i>
+            <div class="item-name">Лате</div>
+            <div class="item-price">75 ₴</div>
+            <div class="counter">
+                <button class="btn-math" onclick="update('lat', -1)">-</button>
+                <span class="count-val" id="lat">0</span>
+                <button class="btn-math" onclick="update('lat', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <i class="fas fa-cookie"></i>
+            <div class="item-name">Cookie</div>
+            <div class="item-price">40 ₴</div>
+            <div class="counter">
+                <button class="btn-math" onclick="update('cook', -1)">-</button>
+                <span class="count-val" id="cook">0</span>
+                <button class="btn-math" onclick="update('cook', 1)">+</button>
             </div>
         </div>
     </div>
 
-    <div class="order-details">
-        <div class="form-group">
-            <label>Номер телефона (для подтверждения)</label>
-            <input type="tel" id="phone" placeholder="+380 99 123 4567">
-        </div>
-        <div class="form-group">
-            <label>На когда приготовить? (время)</label>
-            <input type="time" id="time">
-        </div>
+    <div class="input-group">
+        <label><i class="fas fa-phone"></i> Ваш номер телефону</label>
+        <input type="tel" id="phone" class="input-field" placeholder="+380...">
+        
+        <label><i class="far fa-clock"></i> На котру годину?</label>
+        <input type="time" id="time" class="input-field">
     </div>
 
     <script>
-        // Инициализация Telegram Web App
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширить на весь экран
-
-        // Настройка Главной Кнопки (внизу экрана)
-        tg.MainButton.text = "Оформить заказ (0 ₴)";
+        let tg = window.Telegram.WebApp;
+        tg.expand();
         tg.MainButton.textColor = "#000000";
-        tg.MainButton.color = "#FFD700"; // Наш акцентный цвет
-        tg.MainButton.hide(); // Скрыть по умолчанию
+        tg.MainButton.color = "#ffc107";
 
-        // База данных товаров (синхронизируй с ботом)
-        const products = {
+        let items = {
+            'esp': {name: 'Еспресо', price: 45, count: 0},
             'cap': {name: 'Капучино', price: 65, count: 0},
-            'lat': {name: 'Латте', price: 70, count: 0}
+            'lat': {name: 'Лате', price: 75, count: 0},
+            'cook': {name: 'Cookie', price: 40, count: 0}
         };
 
-        let totalSum = 0;
-
-        // Функция изменения количества
-        function changeCount(id, delta) {
-            const product = products[id];
-            product.count += delta;
-
-            if (product.count < 0) product.count = 0;
-
-            document.getElementById(`count-${id}`).innerText = product.count;
+        function update(id, delta) {
+            items[id].count += delta;
+            if (items[id].count < 0) items[id].count = 0;
+            document.getElementById(id).innerText = items[id].count;
             
-            updateMainButton();
-        }
-
-        // Обновление состояния главной кнопки
-        function updateMainButton() {
-            totalSum = 0;
-            let totalItems = 0;
-
-            for (const key in products) {
-                totalSum += products[key].count * products[key].price;
-                totalItems += products[key].count;
-            }
-
-            if (totalItems > 0) {
-                tg.MainButton.text = `Заказать ${totalItems} шт. на ${totalSum} ₴`;
+            let total = 0;
+            for (let key in items) total += items[key].count * items[key].price;
+            
+            if (total > 0) {
+                tg.MainButton.text = `ЗАМОВИТИ: ${total} ₴`;
                 tg.MainButton.show();
             } else {
                 tg.MainButton.hide();
             }
         }
 
-        // Обработка нажатия на Главную Кнопку (отправка данных боту)
-        Telegram.WebApp.onEvent('mainButtonClicked', function(){
-            const phone = document.getElementById('phone').value;
-            const time = document.getElementById('time').value;
-
-            // Валидация
+        Telegram.WebApp.onEvent('mainButtonClicked', function() {
+            let phone = document.getElementById('phone').value;
+            let time = document.getElementById('time').value;
+            
             if(!phone || !time) {
-                alert("Пожалуйста, укажите телефон и время!");
+                tg.showAlert("Будь ласка, заповніть час та телефон!");
                 return;
             }
 
-            // Формируем заказ
-            let orderItems = [];
-            for (const key in products) {
-                if(products[key].count > 0) {
-                    orderItems.push(`${products[key].name} (x${products[key].count})`);
-                }
+            let orderText = "";
+            for (let key in items) {
+                if(items[key].count > 0) orderText += `${items[key].name} x${items[key].count}; `;
             }
 
-            const dataToBot = {
-                order: orderItems.join(", "),
-                total: totalSum,
+            tg.sendData(JSON.stringify({
+                order: orderText,
                 phone: phone,
                 time: time
-            };
-
-            // Отправляем JSON обратно в бот
-            tg.sendData(JSON.stringify(dataToBot));
-            
-            // Web App закроется автоматически
+            }));
         });
     </script>
 </body>
