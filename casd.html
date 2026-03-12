@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Web App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212; /* Глубокий черный */
+            --text-color: #FFFFFF; /* Белый */
+            --accent-color: #FFD700; /* Золотисто-желтый */
+            --card-bg: #1E1E1E; /* Светло-черный для карточек */
+            --hint-color: #AAAAAA; /* Серый для подсказок */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 80px; /* Отступ для кнопки снизу */
+        }
+
+        h1.shop-name {
+            color: var(--accent-color);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--accent-color);
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+            position: relative;
+        }
+
+        /* Стили Меню */
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .product-card:active {
+            border-color: var(--accent-color);
+        }
+
+        .product-img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .product-price {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .counter {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-count {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .count-value {
+            font-size: 1.2rem;
+            width: 20px;
+        }
+
+        /* Стили Оформления */
+        .order-details {
+            margin-top: 30px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: var(--hint-color);
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            box-sizing: border-box; /* Важно */
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="shop-name">Cafe</h1>
+
+    <div class="menu-container">
+        <div class="product-card">
+            <img src="https://img.icons8.com/emoji/96/000000/coffee-cup-emoji.png" class="product-img" alt="Coffee">
+            <div class="product-name">Капучино</div>
+            <div class="product-price">65 ₴</div>
+            <div class="counter">
+                <button class="btn-count" onclick="changeCount('cap', -1)">-</button>
+                <span class="count-value" id="count-cap">0</span>
+                <button class="btn-count" onclick="changeCount('cap', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <img src="https://img.icons8.com/emoji/96/000000/hot-beverage-emoji.png" class="product-img" alt="Latte">
+            <div class="product-name">Латте</div>
+            <div class="product-price">70 ₴</div>
+            <div class="counter">
+                <button class="btn-count" onclick="changeCount('lat', -1)">-</button>
+                <span class="count-value" id="count-lat">0</span>
+                <button class="btn-count" onclick="changeCount('lat', 1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="order-details">
+        <div class="form-group">
+            <label>Номер телефона (для подтверждения)</label>
+            <input type="tel" id="phone" placeholder="+380 99 123 4567">
+        </div>
+        <div class="form-group">
+            <label>На когда приготовить? (время)</label>
+            <input type="time" id="time">
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Расширить на весь экран
+
+        // Настройка Главной Кнопки (внизу экрана)
+        tg.MainButton.text = "Оформить заказ (0 ₴)";
+        tg.MainButton.textColor = "#000000";
+        tg.MainButton.color = "#FFD700"; // Наш акцентный цвет
+        tg.MainButton.hide(); // Скрыть по умолчанию
+
+        // База данных товаров (синхронизируй с ботом)
+        const products = {
+            'cap': {name: 'Капучино', price: 65, count: 0},
+            'lat': {name: 'Латте', price: 70, count: 0}
+        };
+
+        let totalSum = 0;
+
+        // Функция изменения количества
+        function changeCount(id, delta) {
+            const product = products[id];
+            product.count += delta;
+
+            if (product.count < 0) product.count = 0;
+
+            document.getElementById(`count-${id}`).innerText = product.count;
+            
+            updateMainButton();
+        }
+
+        // Обновление состояния главной кнопки
+        function updateMainButton() {
+            totalSum = 0;
+            let totalItems = 0;
+
+            for (const key in products) {
+                totalSum += products[key].count * products[key].price;
+                totalItems += products[key].count;
+            }
+
+            if (totalItems > 0) {
+                tg.MainButton.text = `Заказать ${totalItems} шт. на ${totalSum} ₴`;
+                tg.MainButton.show();
+            } else {
+                tg.MainButton.hide();
+            }
+        }
+
+        // Обработка нажатия на Главную Кнопку (отправка данных боту)
+        Telegram.WebApp.onEvent('mainButtonClicked', function(){
+            const phone = document.getElementById('phone').value;
+            const time = document.getElementById('time').value;
+
+            // Валидация
+            if(!phone || !time) {
+                alert("Пожалуйста, укажите телефон и время!");
+                return;
+            }
+
+            // Формируем заказ
+            let orderItems = [];
+            for (const key in products) {
+                if(products[key].count > 0) {
+                    orderItems.push(`${products[key].name} (x${products[key].count})`);
+                }
+            }
+
+            const dataToBot = {
+                order: orderItems.join(", "),
+                total: totalSum,
+                phone: phone,
+                time: time
+            };
+
+            // Отправляем JSON обратно в бот
+            tg.sendData(JSON.stringify(dataToBot));
+            
+            // Web App закроется автоматически
+        });
+    </script>
+</body>
+</html>
